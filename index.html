@@ -565,26 +565,31 @@
 
     <script>
         const unitData = [
-            { id: 20, name: "Noob", rarity: "Common", tier: "D", value: 1, demand: "1/10", stability: "Stable", img: "Noob.png" },
-            { id: 19, name: "Zombie Noob", rarity: "Uncommon", tier: "D", value: 3, demand: "2/10", stability: "Stable", img: "Zombie_Noob.png" },
-            { id: 18, name: "Soldier Noob", rarity: "Uncommon", tier: "D", value: 3, demand: "2/10", stability: "Stable", img: "Soldier_Noob.png" },
-            { id: 17, name: "Boxer Noob", rarity: "Rare", tier: "C", value: 8, demand: "3/10", stability: "Stable", img: "Boxer_Noob.png" },                  // D → C
-            { id: 16, name: "SledgeHammer Noob", rarity: "Rare", tier: "D", value: 10, demand: "3/10", stability: "Stable", img: "SledgeHammer_Noob.png" },
-            { id: 15, name: "Spear Noob", rarity: "Rare", tier: "D", value: 14, demand: "4/10", stability: "Stable", img: "Spear_Noob.png" },
-            { id: 14, name: "Medic Noob", rarity: "Epic", tier: "C", value: 25, demand: "4/10", stability: "Stable", img: "Medic_Noob.png" },
-            { id: 13, name: "Knight Noob", rarity: "Epic", tier: "C", value: 40, demand: "5/10", stability: "Stable", img: "Knight_Noob.png" },
+            // S티어
+            { id: 3, name: "Magical Noob", rarity: "Mythical", tier: "S", value: 6000, demand: "8/10", stability: "Stable", img: "Magical_Noob.png" },
+            { id: 5, name: "Laser Noob", rarity: "Mythical", tier: "S", value: 5000, demand: "7.5/10", stability: "Slowly Rising", img: "Laser_Noob.png" },
+            // A티어
+            { id: 1, name: "Hologram Noob", rarity: "Mythical", tier: "A", value: 4000, demand: "9/10", stability: "Rising", img: "Hologram_Noob.png" },
+            { id: 2, name: "King Noob", rarity: "Mythical", tier: "A", value: 3500, demand: "8.5/10", stability: "Stable", img: "King_Noob.png" },
+            { id: 4, name: "Mafia Noob", rarity: "Exclusive", tier: "A", value: 1500, demand: "8.5/10", stability: "Stable", img: "Mafia_Noob.png" },
+            { id: 7, name: "Nature Noob", rarity: "Legendary", tier: "A", value: 450, demand: "7.5/10", stability: "Rising", img: "Nature_Noob.png" },
+            { id: 8, name: "Fairy Noob", rarity: "Exclusive", tier: "A", value: 400, demand: "7/10", stability: "Stable", img: "Fairy_Noob.png" },
+            // B티어
+            { id: 6, name: "Builder Noob", rarity: "Legendary", tier: "B", value: 300, demand: "8/10", stability: "Stable", img: "Builder_Noob.png" },
+            { id: 9, name: "Barbarian Noob", rarity: "Legendary", tier: "B", value: 250, demand: "6.5/10", stability: "Stable", img: "Barbarian_Noob.png" },
+            { id: 10, name: "Gunner Noob", rarity: "Legendary", tier: "B", value: 200, demand: "6/10", stability: "Stable", img: "Gunner_Noob.png" },
+            // C티어
             { id: 12, name: "Shielder Noob", rarity: "Epic", tier: "C", value: 70, demand: "6/10", stability: "Stable", img: "Shielder_Noob.png" },
             { id: 11, name: "Ninja Noob", rarity: "Epic", tier: "C", value: 70, demand: "6/10", stability: "Stable", img: "Ninja_Noob.png" },
-            { id: 10, name: "Gunner Noob", rarity: "Legendary", tier: "B", value: 100, demand: "6/10", stability: "Stable", img: "Gunner_Noob.png" },          // C → B
-            { id: 9, name: "Barbarian Noob", rarity: "Legendary", tier: "B", value: 150, demand: "6.5/10", stability: "Stable", img: "Barbarian_Noob.png" },
-            { id: 8, name: "Fairy Noob", rarity: "Exclusive", tier: "A", value: 500, demand: "7/10", stability: "Stable", img: "Fairy_Noob.png" },
-            { id: 7, name: "Nature Noob", rarity: "Legendary", tier: "A", value: 250, demand: "7.5/10", stability: "Rising", img: "Nature_Noob.png" },         // B → A
-            { id: 6, name: "Builder Noob", rarity: "Legendary", tier: "B", value: 300, demand: "8/10", stability: "Stable", img: "Builder_Noob.png" },
-            { id: 5, name: "Laser Noob", rarity: "Mythical", tier: "S", value: 2000, demand: "7.5/10", stability: "Slowly Rising", img: "Laser_Noob.png" },   // A → S
-            { id: 4, name: "Mafia Noob", rarity: "Exclusive", tier: "A", value: 3500, demand: "8.5/10", stability: "Stable", img: "Mafia_Noob.png" },        // S → A
-            { id: 3, name: "Magical Noob", rarity: "Mythical", tier: "S", value: 3000, demand: "8/10", stability: "Stable", img: "Magical_Noob.png" },       // A → S
-            { id: 2, name: "King Noob", rarity: "Mythical", tier: "A", value: 4000, demand: "8.5/10", stability: "Stable", img: "King_Noob.png" },            // S → A
-            { id: 1, name: "Hologram Noob", rarity: "Mythical", tier: "A", value: 6000, demand: "9/10", stability: "Rising", img: "Hologram_Noob.png" }       // S → A
+            { id: 13, name: "Knight Noob", rarity: "Epic", tier: "C", value: 50, demand: "5/10", stability: "Stable", img: "Knight_Noob.png" },
+            { id: 14, name: "Medic Noob", rarity: "Epic", tier: "C", value: 40, demand: "4/10", stability: "Stable", img: "Medic_Noob.png" },
+            { id: 17, name: "Boxer Noob", rarity: "Rare", tier: "C", value: 20, demand: "3/10", stability: "Stable", img: "Boxer_Noob.png" },
+            // D티어
+            { id: 15, name: "Spear Noob", rarity: "Rare", tier: "D", value: 14, demand: "4/10", stability: "Stable", img: "Spear_Noob.png" },
+            { id: 16, name: "SledgeHammer Noob", rarity: "Rare", tier: "D", value: 10, demand: "3/10", stability: "Stable", img: "SledgeHammer_Noob.png" },
+            { id: 18, name: "Soldier Noob", rarity: "Uncommon", tier: "D", value: 3, demand: "2/10", stability: "Stable", img: "Soldier_Noob.png" },
+            { id: 19, name: "Zombie Noob", rarity: "Uncommon", tier: "D", value: 3, demand: "2/10", stability: "Stable", img: "Zombie_Noob.png" },
+            { id: 20, name: "Noob", rarity: "Common", tier: "D", value: 1, demand: "1/10", stability: "Stable", img: "Noob.png" }
         ];
 
         const rarityWeight = {
