@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Noob Tower Defense Value List</title>
+    <title>Noob Tower Defense Value Hub</title>
     <style>
         :root {
             --bg-main: #0b0c10;
@@ -362,14 +362,16 @@
             margin-bottom: 12px;
             display: flex;
             overflow: hidden;
+            min-height: 124px;
         }
 
         .tier-label {
-            width: 70px;
+            width: 80px;
+            flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 28px;
             font-weight: 900;
             color: #000;
         }
@@ -379,26 +381,34 @@
         .tier-B { background: #ffff7f; }
         .tier-C { background: #7fff7f; }
         .tier-D { background: #7fffff; }
+        .tier-E { background: #c4b5fd; }
 
         .tier-items {
-            padding: 10px;
+            padding: 12px;
             display: flex;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
+            align-items: center;
             flex: 1;
         }
 
         .tier-unit-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 12px;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 6px;
-            text-align: center;
-            width: 75px;
         }
 
-        .tier-unit-card img { width: 45px; height: 45px; object-fit: contain; }
-        .tier-unit-card .name { font-size: 10px; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .tier-unit-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
 
         /* 선택 모달 */
         .modal-overlay {
@@ -443,6 +453,10 @@
         @media (max-width: 768px) {
             .calc-wrapper { grid-template-columns: 1fr; }
             .vs-box { padding-top: 0; }
+            .tier-label { width: 56px; font-size: 22px; }
+            .tier-row { min-height: 96px; }
+            .tier-items { gap: 8px; padding: 8px; }
+            .tier-unit-card { width: 76px; height: 76px; }
         }
     </style>
 </head>
@@ -531,6 +545,7 @@
             <div class="tier-row"><div class="tier-label tier-B">B</div><div id="tier-B" class="tier-items"></div></div>
             <div class="tier-row"><div class="tier-label tier-C">C</div><div id="tier-C" class="tier-items"></div></div>
             <div class="tier-row"><div class="tier-label tier-D">D</div><div id="tier-D" class="tier-items"></div></div>
+            <div class="tier-row"><div class="tier-label tier-E">E</div><div id="tier-E" class="tier-items"></div></div>
         </div>
 
         <!-- ================= TAB 5: Codes (출시 예정) ================= -->
@@ -569,27 +584,28 @@
             { id: 3, name: "Magical Noob", rarity: "Mythical", tier: "S", value: 6000, demand: "8/10", stability: "Stable", img: "Magical_Noob.png" },
             { id: 5, name: "Laser Noob", rarity: "Mythical", tier: "S", value: 5000, demand: "7.5/10", stability: "Slowly Rising", img: "Laser_Noob.png" },
             // A티어
-            { id: 1, name: "Hologram Noob", rarity: "Mythical", tier: "A", value: 4000, demand: "9/10", stability: "Rising", img: "Hologram_Noob.png" },
             { id: 2, name: "King Noob", rarity: "Mythical", tier: "A", value: 3500, demand: "8.5/10", stability: "Stable", img: "King_Noob.png" },
-            { id: 4, name: "Mafia Noob", rarity: "Exclusive", tier: "A", value: 1500, demand: "8.5/10", stability: "Stable", img: "Mafia_Noob.png" },
-            { id: 7, name: "Nature Noob", rarity: "Legendary", tier: "A", value: 450, demand: "7.5/10", stability: "Rising", img: "Nature_Noob.png" },
-            { id: 8, name: "Fairy Noob", rarity: "Exclusive", tier: "A", value: 400, demand: "7/10", stability: "Stable", img: "Fairy_Noob.png" },
+            { id: 7, name: "Nature Noob", rarity: "Legendary", tier: "A", value: 2500, demand: "7.5/10", stability: "Rising", img: "Nature_Noob.png" },
+            { id: 10, name: "Gunner Noob", rarity: "Legendary", tier: "A", value: 2000, demand: "6/10", stability: "Stable", img: "Gunner_Noob.png" },
             // B티어
-            { id: 6, name: "Builder Noob", rarity: "Legendary", tier: "B", value: 300, demand: "8/10", stability: "Stable", img: "Builder_Noob.png" },
-            { id: 9, name: "Barbarian Noob", rarity: "Legendary", tier: "B", value: 250, demand: "6.5/10", stability: "Stable", img: "Barbarian_Noob.png" },
-            { id: 10, name: "Gunner Noob", rarity: "Legendary", tier: "B", value: 200, demand: "6/10", stability: "Stable", img: "Gunner_Noob.png" },
+            { id: 1, name: "Hologram Noob", rarity: "Mythical", tier: "B", value: 1500, demand: "9/10", stability: "Rising", img: "Hologram_Noob.png" },
+            { id: 9, name: "Barbarian Noob", rarity: "Legendary", tier: "B", value: 800, demand: "6.5/10", stability: "Stable", img: "Barbarian_Noob.png" },
+            { id: 4, name: "Mafia Noob", rarity: "Exclusive", tier: "B", value: 400, demand: "8.5/10", stability: "Stable", img: "Mafia_Noob.png" },
+            { id: 8, name: "Fairy Noob", rarity: "Exclusive", tier: "B", value: 300, demand: "7/10", stability: "Stable", img: "Fairy_Noob.png" },
             // C티어
-            { id: 12, name: "Shielder Noob", rarity: "Epic", tier: "C", value: 70, demand: "6/10", stability: "Stable", img: "Shielder_Noob.png" },
-            { id: 11, name: "Ninja Noob", rarity: "Epic", tier: "C", value: 70, demand: "6/10", stability: "Stable", img: "Ninja_Noob.png" },
-            { id: 13, name: "Knight Noob", rarity: "Epic", tier: "C", value: 50, demand: "5/10", stability: "Stable", img: "Knight_Noob.png" },
-            { id: 14, name: "Medic Noob", rarity: "Epic", tier: "C", value: 40, demand: "4/10", stability: "Stable", img: "Medic_Noob.png" },
-            { id: 17, name: "Boxer Noob", rarity: "Rare", tier: "C", value: 20, demand: "3/10", stability: "Stable", img: "Boxer_Noob.png" },
+            { id: 6, name: "Builder Noob", rarity: "Legendary", tier: "C", value: 200, demand: "8/10", stability: "Stable", img: "Builder_Noob.png" },
+            { id: 11, name: "Ninja Noob", rarity: "Epic", tier: "C", value: 150, demand: "6/10", stability: "Stable", img: "Ninja_Noob.png" },
+            { id: 14, name: "Medic Noob", rarity: "Epic", tier: "C", value: 120, demand: "4/10", stability: "Stable", img: "Medic_Noob.png" },
+            { id: 17, name: "Boxer Noob", rarity: "Rare", tier: "C", value: 100, demand: "3/10", stability: "Stable", img: "Boxer_Noob.png" },
             // D티어
-            { id: 15, name: "Spear Noob", rarity: "Rare", tier: "D", value: 14, demand: "4/10", stability: "Stable", img: "Spear_Noob.png" },
-            { id: 16, name: "SledgeHammer Noob", rarity: "Rare", tier: "D", value: 10, demand: "3/10", stability: "Stable", img: "SledgeHammer_Noob.png" },
-            { id: 18, name: "Soldier Noob", rarity: "Uncommon", tier: "D", value: 3, demand: "2/10", stability: "Stable", img: "Soldier_Noob.png" },
-            { id: 19, name: "Zombie Noob", rarity: "Uncommon", tier: "D", value: 3, demand: "2/10", stability: "Stable", img: "Zombie_Noob.png" },
-            { id: 20, name: "Noob", rarity: "Common", tier: "D", value: 1, demand: "1/10", stability: "Stable", img: "Noob.png" }
+            { id: 12, name: "Shielder Noob", rarity: "Epic", tier: "D", value: 70, demand: "6/10", stability: "Stable", img: "Shielder_Noob.png" },
+            { id: 13, name: "Knight Noob", rarity: "Epic", tier: "D", value: 50, demand: "5/10", stability: "Stable", img: "Knight_Noob.png" },
+            { id: 15, name: "Spear Noob", rarity: "Rare", tier: "D", value: 30, demand: "4/10", stability: "Stable", img: "Spear_Noob.png" },
+            { id: 18, name: "Soldier Noob", rarity: "Uncommon", tier: "D", value: 20, demand: "2/10", stability: "Stable", img: "Soldier_Noob.png" },
+            // E티어
+            { id: 16, name: "SledgeHammer Noob", rarity: "Rare", tier: "E", value: 10, demand: "3/10", stability: "Stable", img: "SledgeHammer_Noob.png" },
+            { id: 19, name: "Zombie Noob", rarity: "Uncommon", tier: "E", value: 5, demand: "2/10", stability: "Stable", img: "Zombie_Noob.png" },
+            { id: 20, name: "Noob", rarity: "Common", tier: "E", value: 1, demand: "1/10", stability: "Stable", img: "Noob.png" }
         ];
 
         const rarityWeight = {
@@ -763,17 +779,18 @@
             return card;
         }
 
-        // 3. 티어 리스트 빌드
+        // 3. 티어 리스트 빌드 (이름 없이 큰 이미지만, 가치 높은 순)
         function initTierList() {
-            ['S', 'A', 'B', 'C', 'D'].forEach(tier => {
+            ['S', 'A', 'B', 'C', 'D', 'E'].forEach(tier => {
                 const container = document.getElementById(`tier-${tier}`);
-                const items = unitData.filter(u => u.tier === tier);
+                const items = unitData
+                    .filter(u => u.tier === tier)
+                    .sort((a, b) => b.value - a.value);
                 items.forEach(u => {
                     const imgSrc = encodeURI(`./${u.img}`);
                     container.innerHTML += `
-                        <div class="tier-unit-card">
-                            <img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/45'">
-                            <div class="name">${u.name}</div>
+                        <div class="tier-unit-card" title="${u.name}">
+                            <img src="${imgSrc}" alt="${u.name}" onerror="this.src='https://via.placeholder.com/100'">
                         </div>
                     `;
                 });
