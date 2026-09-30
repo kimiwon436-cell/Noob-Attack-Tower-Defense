@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Noob Tower Defense Value Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-main: #0b0c10;
@@ -186,6 +188,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            cursor: pointer;
+            transition: transform 0.12s ease, border-color 0.12s ease;
+        }
+
+        .unit-card:hover {
+            transform: translateY(-2px);
+            border-color: #4a556e;
         }
 
         .unit-title {
@@ -538,6 +547,125 @@
             cursor: pointer;
         }
 
+        /* 유닛 스탯 모달 (게임 UI 스타일) */
+        .stats-modal-body {
+            background: #1c1c20;
+            border: 1px solid #2f2f36;
+            border-radius: 16px;
+            width: 92%;
+            max-width: 380px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 16px;
+            position: relative;
+            font-family: "Fredoka", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .stats-close-btn {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: #2b2b31;
+            border: none;
+            color: #fff;
+            width: 28px; height: 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .sm-name {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 30px 12px;
+            text-shadow: 0 2px 0 #000;
+        }
+
+        .sm-top {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 104px minmax(0, 1.25fr);
+            gap: 10px;
+            align-items: start;
+            margin-bottom: 14px;
+        }
+
+        .sm-left, .sm-right {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-weight: 700;
+            text-shadow: 0 2px 0 #000;
+        }
+
+        .sm-right { align-items: flex-end; text-align: right; }
+
+        .sm-rarity { font-size: 14px; white-space: nowrap; }
+        .sm-type { font-size: 14px; color: #fff; }
+        .sm-ability-block { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+        .sm-ability { font-size: 16px; color: #fff; white-space: nowrap; }
+        .sm-ability-val { font-size: 12px; color: #fff; white-space: nowrap; }
+        .sm-ability-note { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-shadow: none; }
+
+        .sm-img {
+            width: 104px; height: 104px;
+            background: #2a2a30;
+            border: 2px solid var(--rarity-color, #555);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .sm-img img { max-width: 85%; max-height: 85%; object-fit: contain; }
+
+        .sm-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sm-row {
+            display: grid;
+            grid-template-columns: 48px 1fr;
+            gap: 8px;
+        }
+
+        .sm-icon, .sm-val, .sm-dps {
+            background: #2b2b31;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+        }
+
+        .sm-icon { font-size: 20px; }
+
+        .sm-val, .sm-dps {
+            font-size: 19px;
+            font-weight: 700;
+            text-shadow: 0 2px 0 #000;
+        }
+
+        .sm-dps { height: 44px; font-size: 20px; }
+
+        .sm-caption {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+
+        .stats-empty {
+            background: #2b2b31;
+            border-radius: 10px;
+            padding: 26px 16px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
         @media (max-width: 768px) {
             .calc-wrapper { grid-template-columns: 1fr; }
             .vs-box { padding-top: 0; }
@@ -670,6 +798,14 @@
         </div>
     </div>
 
+    <!-- 유닛 스탯 모달 -->
+    <div id="statsModal" class="modal-overlay" onclick="if (event.target === this) closeStats()">
+        <div class="stats-modal-body">
+            <button class="stats-close-btn" onclick="closeStats()">✕</button>
+            <div id="statsContent"></div>
+        </div>
+    </div>
+
     <script>
         const unitData = [
             // S티어
@@ -699,6 +835,197 @@
             { id: 19, name: "Zombie Noob", rarity: "Uncommon", tier: "E", value: 5, demand: "2/10", stability: "Stable", img: "Zombie_Noob.png" },
             { id: 20, name: "Noob", rarity: "Common", tier: "E", value: 1, demand: "1/10", stability: "Stable", img: "Noob.png" }
         ];
+
+        // 유닛별 레벨 스탯 (게임의 UnitLevel 모듈 값 그대로)
+        // Price: 1레벨 = 설치 비용, 2레벨부터 = 업그레이드 비용
+        // 새 유닛은 이름을 unitData의 name과 똑같이 맞춰서 추가
+        const unitStats = {
+            "Noob": {
+                type: "밸런스형",
+                levels: [
+                    { Damage: 5,  CoolTime: 1,    Range: 5,  ShotCoin: 0, Price: 100, Sell: 70 },
+                    { Damage: 10, CoolTime: 0.75, Range: 7,  ShotCoin: 0, Price: 80,  Sell: 150 },
+                    { Damage: 15, CoolTime: 0.5,  Range: 10, ShotCoin: 0, Price: 150, Sell: 250 }
+                ]
+            },
+            "Soldier Noob": {
+                type: "밸런스형",
+                levels: [
+                    { Damage: 10, CoolTime: 1,   Range: 15, ShotCoin: 0, Price: 150, Sell: 100 },
+                    { Damage: 20, CoolTime: 0.6, Range: 20, ShotCoin: 0, Price: 200, Sell: 200 },
+                    { Damage: 25, CoolTime: 0.4, Range: 20, ShotCoin: 0, Price: 300, Sell: 400 }
+                ]
+            },
+            "Zombie Noob": {
+                type: "속사형",
+                levels: [
+                    { Damage: 15, CoolTime: 1,   Range: 10, ShotCoin: 0, Price: 200, Sell: 150 },
+                    { Damage: 20, CoolTime: 0.5, Range: 15, ShotCoin: 0, Price: 150, Sell: 200 },
+                    { Damage: 30, CoolTime: 0.5, Range: 20, ShotCoin: 0, Price: 250, Sell: 450 }
+                ]
+            },
+            "Boxer Noob": {
+                type: "속사형",
+                levels: [
+                    { Damage: 20, CoolTime: 1,   Range: 15, ShotCoin: 0, Price: 250, Sell: 200 },
+                    { Damage: 25, CoolTime: 0.8, Range: 20, ShotCoin: 0, Price: 250, Sell: 400 },
+                    { Damage: 35, CoolTime: 0.6, Range: 25, ShotCoin: 0, Price: 400, Sell: 750 },
+                    { Damage: 40, CoolTime: 0.4, Range: 30, ShotCoin: 0, Price: 550, Sell: 1200 }
+                ]
+            },
+            "SledgeHammer Noob": {
+                type: "중장타형",
+                levels: [
+                    { Damage: 20, CoolTime: 1.5, Range: 10, ShotCoin: 0, Price: 400, Sell: 224 },
+                    { Damage: 25, CoolTime: 1,   Range: 15, ShotCoin: 0, Price: 300, Sell: 399 },
+                    { Damage: 30, CoolTime: 1,   Range: 20, ShotCoin: 0, Price: 500, Sell: 714,  Splash: 5 },
+                    { Damage: 50, CoolTime: 0.8, Range: 25, ShotCoin: 0, Price: 700, Sell: 1239, Splash: 7 }
+                ]
+            },
+            "Spear Noob": {
+                type: "저격형",
+                levels: [
+                    { Damage: 30, CoolTime: 1,   Range: 15, ShotCoin: 0, Price: 300, Sell: 250 },
+                    { Damage: 40, CoolTime: 0.8, Range: 25, ShotCoin: 0, Price: 300, Sell: 450 },
+                    { Damage: 45, CoolTime: 0.6, Range: 30, ShotCoin: 0, Price: 450, Sell: 850 }
+                ]
+            },
+            "Knight Noob": {
+                type: "중장타형",
+                levels: [
+                    { Damage: 35, CoolTime: 1,   Range: 20, ShotCoin: 0, Price: 450,  Sell: 300 },
+                    { Damage: 60, CoolTime: 0.6, Range: 25, ShotCoin: 0, Price: 600,  Sell: 800,  Splash: 5 },
+                    { Damage: 85, CoolTime: 0.5, Range: 30, ShotCoin: 0, Price: 1200, Sell: 2000, Splash: 5 }
+                ]
+            },
+            "Medic Noob": {
+                type: "밸런스형",
+                special: "farm",   // 공격 대신 돈 생산 (Farmer_money)
+                levels: [
+                    { Damage: 0, CoolTime: 0, Range: 0, ShotCoin: 0, Price: 200, Sell: 150,  Farmer: 50 },
+                    { Damage: 0, CoolTime: 0, Range: 0, ShotCoin: 0, Price: 200, Sell: 300,  Farmer: 100 },
+                    { Damage: 0, CoolTime: 0, Range: 0, ShotCoin: 0, Price: 450, Sell: 700,  Farmer: 250 },
+                    { Damage: 0, CoolTime: 0, Range: 0, ShotCoin: 0, Price: 600, Sell: 1200, Farmer: 300 }
+                ]
+            },
+            "Ninja Noob": {
+                type: "속사형",
+                levels: [
+                    { Damage: 45, CoolTime: 1,    Range: 15, ShotCoin: 0, Price: 500,  Sell: 350 },
+                    { Damage: 65, CoolTime: 0.8,  Range: 15, ShotCoin: 0, Price: 450,  Sell: 750 },
+                    { Damage: 75, CoolTime: 0.6,  Range: 20, ShotCoin: 0, Price: 800,  Sell: 1500 },
+                    { Damage: 90, CoolTime: 0.35, Range: 25, ShotCoin: 0, Price: 1100, Sell: 2500 }
+                ]
+            },
+            "Shielder Noob": {
+                type: "중장타형",
+                levels: [
+                    { Damage: 30, CoolTime: 1,    Range: 10, ShotCoin: 0, Price: 400, Sell: 300 },
+                    { Damage: 50, CoolTime: 0.85, Range: 20, ShotCoin: 0, Price: 350, Sell: 650 },
+                    { Damage: 60, CoolTime: 0.75, Range: 25, ShotCoin: 0, Price: 600, Sell: 1100 },
+                    { Damage: 75, CoolTime: 0.6,  Range: 30, ShotCoin: 0, Price: 800, Sell: 1950 }
+                ]
+            },
+            "Barbarian Noob": {
+                type: "중장타형",
+                levels: [
+                    { Damage: 90,  CoolTime: 1,   Range: 10, ShotCoin: 0, Price: 600,  Sell: 500 },
+                    { Damage: 100, CoolTime: 0.9, Range: 15, ShotCoin: 0, Price: 700,  Sell: 1100 },
+                    { Damage: 120, CoolTime: 0.6, Range: 30, ShotCoin: 0, Price: 1200, Sell: 2200, AOE: 40 },
+                    { Damage: 135, CoolTime: 0.4, Range: 35, ShotCoin: 0, Price: 2000, Sell: 4000, AOE: 75 }
+                ]
+            },
+            "Builder Noob": {
+                type: "밸런스형",
+                special: "build",  // Damage = 짓는 구조물의 체력
+                levels: [
+                    { Damage: 500,  CoolTime: 25, Range: 12, ShotCoin: 0, Price: 600,  Sell: 525 },
+                    { Damage: 1000, CoolTime: 20, Range: 13, ShotCoin: 0, Price: 700,  Sell: 945 },
+                    { Damage: 1500, CoolTime: 20, Range: 14, ShotCoin: 0, Price: 1200, Sell: 1645 },
+                    { Damage: 3000, CoolTime: 15, Range: 16, ShotCoin: 0, Price: 1500, Sell: 2765 }
+                ]
+            },
+            "Gunner Noob": {
+                type: "속사형",
+                levels: [
+                    { Damage: 120, CoolTime: 1,    Range: 25, ShotCoin: 0, Price: 800,  Sell: 650 },
+                    { Damage: 150, CoolTime: 0.6,  Range: 30, ShotCoin: 0, Price: 650,  Sell: 1200 },
+                    { Damage: 180, CoolTime: 0.45, Range: 35, ShotCoin: 0, Price: 1000, Sell: 2200 },
+                    { Damage: 200, CoolTime: 0.3,  Range: 40, ShotCoin: 0, Price: 1750, Sell: 4000 }
+                ]
+            },
+            "Nature Noob": {
+                type: "밸런스형",
+                levels: [
+                    { Damage: 100, CoolTime: 1,    Range: 15, ShotCoin: 0, Price: 750,  Sell: 600,  Slow: 15 },
+                    { Damage: 150, CoolTime: 0.8,  Range: 25, ShotCoin: 0, Price: 800,  Sell: 1300, Slow: 20 },
+                    { Damage: 175, CoolTime: 0.65, Range: 35, ShotCoin: 0, Price: 1500, Sell: 2800, Slow: 25, Splash: 7 },
+                    { Damage: 180, CoolTime: 0.5,  Range: 40, ShotCoin: 0, Price: 2000, Sell: 4800, Slow: 30, Splash: 9 }
+                ]
+            },
+            "Hologram Noob": {
+                type: "저격형",
+                levels: [
+                    { Damage: 150, CoolTime: 1,   Range: 10, ShotCoin: 0, Price: 1500, Sell: 1200, Clone: 1 },
+                    { Damage: 250, CoolTime: 0.8, Range: 20, ShotCoin: 0, Price: 1200, Sell: 2350, Clone: 1 },
+                    { Damage: 350, CoolTime: 0.6, Range: 25, ShotCoin: 0, Price: 2500, Sell: 4500, Clone: 1 },
+                    { Damage: 500, CoolTime: 0.5, Range: 30, ShotCoin: 0, Price: 4500, Sell: 9250, Clone: 1 }
+                ]
+            },
+            "King Noob": {
+                type: "밸런스형",
+                special: "farm",   // CoolTime마다 Farmer_money 지급 + 소환 (SummonHP = 소환수 체력)
+                levels: [
+                    { Damage: 0, CoolTime: 30, Range: 0, ShotCoin: 0, Price: 1000, Sell: 800,   Farmer: 100, SummonHP: 1000 },
+                    { Damage: 0, CoolTime: 25, Range: 0, ShotCoin: 0, Price: 2000, Sell: 2500,  Farmer: 200, SummonHP: 2000 },
+                    { Damage: 0, CoolTime: 20, Range: 0, ShotCoin: 0, Price: 3000, Sell: 5350,  Farmer: 400, SummonHP: 4000 },
+                    { Damage: 0, CoolTime: 15, Range: 0, ShotCoin: 0, Price: 6000, Sell: 10500, Farmer: 500, SummonHP: 5000 }
+                ]
+            },
+            "Laser Noob": {
+                type: "저격형",
+                levels: [
+                    { Damage: 100, CoolTime: 1,   Range: 25, ShotCoin: 0, Price: 1000, Sell: 800 },
+                    { Damage: 120, CoolTime: 0.7, Range: 30, ShotCoin: 0, Price: 1250, Sell: 2000 },
+                    { Damage: 140, CoolTime: 0.5, Range: 35, ShotCoin: 0, Price: 2000, Sell: 4000,  Slow: 25 },
+                    { Damage: 145, CoolTime: 0.3, Range: 40, ShotCoin: 0, Price: 4000, Sell: 7800,  Slow: 35 },
+                    { Damage: 175, CoolTime: 0.2, Range: 45, ShotCoin: 0, Price: 6500, Sell: 14000, Slow: 40 }
+                ]
+            },
+            "Magical Noob": {
+                type: "저격형",
+                levels: [
+                    { Damage: 100, CoolTime: 1,    Range: 10, ShotCoin: 0, Price: 1500, Sell: 1200 },
+                    { Damage: 150, CoolTime: 0.9,  Range: 10, ShotCoin: 0, Price: 1500, Sell: 2500 },
+                    { Damage: 200, CoolTime: 0.75, Range: 15, ShotCoin: 0, Price: 2000, Sell: 4500,  AOE: 45 },
+                    { Damage: 225, CoolTime: 0.5,  Range: 20, ShotCoin: 0, Price: 2500, Sell: 7000,  AOE: 60 },
+                    { Damage: 250, CoolTime: 0.3,  Range: 25, ShotCoin: 0, Price: 3500, Sell: 9500,  AOE: 90 },
+                    { Damage: 350, CoolTime: 0.2,  Range: 30, ShotCoin: 0, Price: 4000, Sell: 13000, AOE: 120 }
+                ]
+            },
+            "Fairy Noob": {
+                type: "저격형",
+                // 공격 + Lv4부터 FarmerCD(Farmer_Cooldown)초마다 Farmer(Farmer_money) 지급
+                levels: [
+                    { Damage: 30,  CoolTime: 1,   Range: 10, ShotCoin: 0, Price: 800,  Sell: 550 },
+                    { Damage: 60,  CoolTime: 0.9, Range: 15, ShotCoin: 0, Price: 800,  Sell: 1300 },
+                    { Damage: 90,  CoolTime: 0.8, Range: 20, ShotCoin: 0, Price: 1500, Sell: 2250 },
+                    { Damage: 100, CoolTime: 0.6, Range: 25, ShotCoin: 0, Price: 2000, Sell: 5000,  Farmer: 50,  FarmerCD: 40 },
+                    { Damage: 130, CoolTime: 0.5, Range: 30, ShotCoin: 0, Price: 3000, Sell: 7000,  Farmer: 100, FarmerCD: 35 },
+                    { Damage: 150, CoolTime: 0.3, Range: 35, ShotCoin: 0, Price: 4000, Sell: 10000, Farmer: 150, FarmerCD: 30 }
+                ]
+            },
+            "Mafia Noob": {
+                type: "속사형",
+                levels: [
+                    { Damage: 100, CoolTime: 1,    Range: 15, ShotCoin: 0, Price: 1000, Sell: 750 },
+                    { Damage: 150, CoolTime: 0.9,  Range: 20, ShotCoin: 0, Price: 1000, Sell: 1500 },
+                    { Damage: 175, CoolTime: 0.85, Range: 25, ShotCoin: 0, Price: 2000, Sell: 3350 },
+                    { Damage: 250, CoolTime: 0.6,  Range: 30, ShotCoin: 0, Price: 3000, Sell: 5500 },
+                    { Damage: 450, CoolTime: 0.5,  Range: 35, ShotCoin: 0, Price: 4000, Sell: 9500 }
+                ]
+            }
+        };
 
         // 게임 코드 목록 (새 코드는 맨 위에 추가, 만료되면 active: false)
         // reward에 보상 내용을 적으면 카드에 표시됩니다. 비워두면 표시 안 됨.
@@ -763,6 +1090,7 @@
             filtered.forEach(unit => {
                 const card = document.createElement('div');
                 card.className = 'unit-card';
+                card.onclick = () => openStats(unit);
 
                 const imgSrc = encodeURI(`./${unit.img}`);
 
@@ -770,7 +1098,7 @@
                     <div class="unit-title">${unit.name}</div>
                     <div class="rarity-tag rarity-${unit.rarity}">${unit.rarity}</div>
                     <div class="unit-img-wrapper">
-                        <img src="${imgSrc}" alt="${unit.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/120/11131a/ef4444?text=File+Not+Found'">
+                        <img src="${imgSrc}" alt="${unit.name}" loading="lazy" onerror="this.onerror=null; this.src='https://via.placeholder.com/120/11131a/ef4444?text=File+Not+Found'">
                     </div>
                     <div class="stats-list">
                         <div class="stat-row"><span>Value</span> <span class="stat-val">💎 ${unit.value.toLocaleString()}</span></div>
@@ -807,7 +1135,7 @@
                 
                 const imgSrc = encodeURI(`./${unit.img}`);
                 item.innerHTML = `
-                    <img src="${imgSrc}" style="width:40px; height:40px; object-fit:contain;" onerror="this.src='https://via.placeholder.com/40'">
+                    <img src="${imgSrc}" style="width:40px; height:40px; object-fit:contain;" onerror="this.onerror=null; this.src='https://via.placeholder.com/40'">
                     <div style="font-size:10px; font-weight:bold;">${unit.name}</div>
                     <div style="font-size:10px; color:var(--accent-green);">💎 ${unit.value}</div>
                 `;
@@ -870,7 +1198,7 @@
             const imgSrc = encodeURI(`./${u.img}`);
             card.innerHTML = `
                 <button class="remove-btn" onclick="removeFromCalc('${target}', ${idx})">✕</button>
-                <img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/40'">
+                <img src="${imgSrc}" onerror="this.onerror=null; this.src='https://via.placeholder.com/40'">
                 <div class="name">${u.name}</div>
                 <div class="val">💎 ${u.value}</div>
             `;
@@ -888,12 +1216,130 @@
                     const imgSrc = encodeURI(`./${u.img}`);
                     container.innerHTML += `
                         <div class="tier-unit-card" title="${u.name}">
-                            <img src="${imgSrc}" alt="${u.name}" onerror="this.src='https://via.placeholder.com/100'">
+                            <img src="${imgSrc}" alt="${u.name}" onerror="this.onerror=null; this.src='https://via.placeholder.com/100'">
                         </div>
                     `;
                 });
             });
         }
+
+        // 유닛 스탯 모달
+        function fmt(n) {
+            return Number.isInteger(n) ? n.toLocaleString() : parseFloat(n.toFixed(2)).toString();
+        }
+
+        const rarityColor = {
+            "Common": "#94a3b8",
+            "Uncommon": "#22c55e",
+            "Rare": "#3b82f6",
+            "Epic": "#a855f7",
+            "Legendary": "#f59e0b",
+            "Mythical": "#f43f5e",
+            "Exclusive": "#ec4899"
+        };
+
+        function statRange(a, b) {
+            return a === b ? fmt(a) : `${fmt(a)} → ${fmt(b)}`;
+        }
+
+        // 특수 능력 표시 설정 (levels에 이 키가 있으면 오른쪽 위에 표시)
+        //  flag: 값 없이 이름만 표시 / label: 값 앞 글자 / extra: 같이 보여줄 쿨타임 키
+        const abilityInfo = [
+            { key: 'Slow',     icon: '🐌', suffix: '%' },
+            { key: 'Splash',   icon: '💥' },
+            { key: 'AOE',      icon: '🌀' },
+            { key: 'Clone',    icon: '👥', flag: true },
+            { key: 'SummonHP', icon: '👑', name: 'Summoner', label: 'HP' },
+            { key: 'Farmer',   icon: '💰', extra: 'FarmerCD' }
+        ];
+
+        function openStats(unit) {
+            const content = document.getElementById('statsContent');
+            const stats = unitStats[unit.name];
+            const imgSrc = encodeURI(`./${unit.img}`);
+            const color = rarityColor[unit.rarity] || '#94a3b8';
+
+            // 오른쪽 위 능력 목록
+            let abilityHtml = '';
+            if (stats) {
+                const lv = stats.levels;
+                const last = lv[lv.length - 1];
+
+                if (stats.special === 'build') {
+                    abilityHtml += `<div class="sm-ability-block"><div class="sm-ability">🔨 Build</div></div>`;
+                } else if (stats.special === 'farm') {
+                    abilityHtml += `<div class="sm-ability-block"><div class="sm-ability">💰 Farmer</div></div>`;
+                }
+
+                abilityInfo.forEach(a => {
+                    if (a.key === 'Farmer' && stats.special === 'farm') return; // 이미 아래 줄에 표시됨
+                    const firstIdx = lv.findIndex(l => l[a.key] > 0);
+                    if (firstIdx === -1) return;
+                    const rng = (k, suf = '') => {
+                        const x = lv[firstIdx][k], y = last[k];
+                        return x === y ? `${fmt(x)}${suf}` : `${fmt(x)}${suf} → ${fmt(y)}${suf}`;
+                    };
+                    let vals = '';
+                    if (!a.flag) vals += `<div class="sm-ability-val">${a.label || a.key}: ${rng(a.key, a.suffix || '')}</div>`;
+                    if (a.extra && lv[firstIdx][a.extra] > 0) vals += `<div class="sm-ability-val">⏱️ ${rng(a.extra, 's')}</div>`;
+                    abilityHtml += `
+                        <div class="sm-ability-block">
+                            <div class="sm-ability">${a.icon} ${a.name || a.key}</div>
+                            ${vals}
+                            ${firstIdx > 0 ? `<div class="sm-ability-note">Lv${firstIdx + 1}부터</div>` : ''}
+                        </div>
+                    `;
+                });
+            }
+
+            let html = `
+                <div class="sm-name">${unit.name}</div>
+                <div class="sm-top" style="--rarity-color:${color};">
+                    <div class="sm-left">
+                        <div class="sm-rarity" style="color:${color};">• ${unit.rarity}</div>
+                    </div>
+                    <div class="sm-img">
+                        <img src="${imgSrc}" alt="${unit.name}" onerror="this.onerror=null; this.src='https://via.placeholder.com/100'">
+                    </div>
+                    <div class="sm-right">${abilityHtml}</div>
+                </div>
+            `;
+
+            if (!stats) {
+                html += `<div class="stats-empty">📊 이 유닛의 스탯은 곧 추가됩니다.</div>`;
+            } else {
+                const lv = stats.levels;
+                const f = lv[0], l = lv[lv.length - 1];
+                const row = (icon, a, b) => `<div class="sm-row"><div class="sm-icon">${icon}</div><div class="sm-val">${statRange(a, b)}</div></div>`;
+                const allZero = key => lv.every(x => !x[key]);
+
+                let rows = '';
+                if (stats.special === 'farm') {
+                    rows += row('💰', f.Farmer, l.Farmer);
+                } else {
+                    rows += row(stats.special === 'build' ? '❤️' : '🗡️', f.Damage, l.Damage);
+                }
+                if (!allZero('Range')) rows += row('🎯', f.Range, l.Range);
+                if (!allZero('CoolTime')) rows += row('⏱️', f.CoolTime, l.CoolTime);
+                if (!stats.special && f.CoolTime > 0 && l.CoolTime > 0) {
+                    rows += `<div class="sm-dps">DPS ${statRange(f.Damage / f.CoolTime, l.Damage / l.CoolTime)}</div>`;
+                }
+
+                html += `
+                    <div class="sm-rows">${rows}</div>
+                    <div class="sm-caption">Lv 1 → Lv ${lv.length} (Max)</div>
+                `;
+            }
+
+            content.innerHTML = html;
+            document.getElementById('statsModal').style.display = 'flex';
+        }
+
+        function closeStats() { document.getElementById('statsModal').style.display = 'none'; }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { closeStats(); closePicker(); }
+        });
 
         // 4. 코드 목록 빌드
         function renderCodes() {
