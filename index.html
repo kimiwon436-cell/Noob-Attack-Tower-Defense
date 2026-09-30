@@ -410,6 +410,94 @@
             object-fit: contain;
         }
 
+        /* ================= 5. 코드 (Codes) ================= */
+        .codes-header {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .codes-header-icon { font-size: 28px; }
+        .codes-header-title { font-size: 17px; font-weight: 800; }
+        .codes-header-desc { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+        .codes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .code-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .code-card.expired { opacity: 0.5; }
+
+        .code-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .code-text {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            word-break: break-all;
+        }
+
+        .code-card.expired .code-text { text-decoration: line-through; }
+
+        .code-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+        }
+
+        .code-status {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+            text-transform: uppercase;
+        }
+
+        .code-status.active { background: #0f2d18; color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .code-status.expired { background: #331416; color: var(--accent-red); border: 1px solid var(--accent-red); }
+
+        .copy-btn {
+            background: #222938;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .copy-btn:hover { background: #2d364a; }
+        .copy-btn.copied { background: #0f2d18; border-color: var(--accent-green); color: var(--accent-green); }
+
         /* 선택 모달 */
         .modal-overlay {
             position: fixed;
@@ -457,6 +545,7 @@
             .tier-row { min-height: 96px; }
             .tier-items { gap: 8px; padding: 8px; }
             .tier-unit-card { width: 76px; height: 76px; }
+            .code-text { font-size: 16px; }
         }
     </style>
 </head>
@@ -548,13 +637,16 @@
             <div class="tier-row"><div class="tier-label tier-E">E</div><div id="tier-E" class="tier-items"></div></div>
         </div>
 
-        <!-- ================= TAB 5: Codes (출시 예정) ================= -->
+        <!-- ================= TAB 5: Codes ================= -->
         <div id="tab-codes" class="tab-pane">
-            <div class="coming-soon-box">
-                <div class="coming-soon-icon">🎁</div>
-                <div>Game Codes - Coming Soon!</div>
-                <div class="coming-soon-desc">게임 내에서 사용 가능한 최신 쿠폰 코드가 곧 업데이트됩니다.</div>
+            <div class="codes-header">
+                <div class="codes-header-icon">🎁</div>
+                <div>
+                    <div class="codes-header-title">Game Codes</div>
+                    <div class="codes-header-desc">게임 내에서 사용 가능한 쿠폰 코드입니다. Copy 버튼을 눌러 복사하세요.</div>
+                </div>
             </div>
+            <div id="codesList" class="codes-list"></div>
         </div>
 
         <!-- ================= TAB 6: Discord (출시 예정) ================= -->
@@ -606,6 +698,12 @@
             { id: 16, name: "SledgeHammer Noob", rarity: "Rare", tier: "E", value: 10, demand: "3/10", stability: "Stable", img: "SledgeHammer_Noob.png" },
             { id: 19, name: "Zombie Noob", rarity: "Uncommon", tier: "E", value: 5, demand: "2/10", stability: "Stable", img: "Zombie_Noob.png" },
             { id: 20, name: "Noob", rarity: "Common", tier: "E", value: 1, demand: "1/10", stability: "Stable", img: "Noob.png" }
+        ];
+
+        // 게임 코드 목록 (새 코드는 맨 위에 추가, 만료되면 active: false)
+        // reward에 보상 내용을 적으면 카드에 표시됩니다. 비워두면 표시 안 됨.
+        const codesData = [
+            { code: "Release0927", reward: "", active: true }
         ];
 
         const rarityWeight = {
@@ -797,9 +895,71 @@
             });
         }
 
+        // 4. 코드 목록 빌드
+        function renderCodes() {
+            const list = document.getElementById('codesList');
+            list.innerHTML = '';
+
+            codesData.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'code-card' + (c.active ? '' : ' expired');
+
+                const info = document.createElement('div');
+                info.className = 'code-info';
+                info.innerHTML = `
+                    <div class="code-text">${c.code}</div>
+                    <div class="code-meta">
+                        <span class="code-status ${c.active ? 'active' : 'expired'}">${c.active ? 'Active' : 'Expired'}</span>
+                        ${c.reward ? `<span>🎁 ${c.reward}</span>` : ''}
+                    </div>
+                `;
+                card.appendChild(info);
+
+                if (c.active) {
+                    const btn = document.createElement('button');
+                    btn.className = 'copy-btn';
+                    btn.innerText = '📋 Copy';
+                    btn.onclick = () => copyCode(c.code, btn);
+                    card.appendChild(btn);
+                }
+
+                list.appendChild(card);
+            });
+        }
+
+        function copyCode(code, btn) {
+            const done = () => {
+                btn.classList.add('copied');
+                btn.innerText = '✅ Copied!';
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.innerText = '📋 Copy';
+                }, 1500);
+            };
+
+            const fallback = () => {
+                const ta = document.createElement('textarea');
+                ta.value = code;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); } catch (e) {}
+                document.body.removeChild(ta);
+                done();
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(done).catch(fallback);
+            } else {
+                fallback();
+            }
+        }
+
         // 초기화 실행
         renderValueList();
         initTierList();
+        renderCodes();
     </script>
 </body>
 </html>
