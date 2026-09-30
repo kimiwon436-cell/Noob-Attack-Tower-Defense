@@ -602,7 +602,7 @@
         .sm-rarity { font-size: 14px; white-space: nowrap; }
         .sm-type { font-size: 14px; color: #fff; }
         .sm-ability-block { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
-        .sm-ability { font-size: 16px; color: #fff; white-space: nowrap; }
+        .sm-ability { font-size: 16px; color: #fff; }
         .sm-ability-val { font-size: 12px; color: #fff; white-space: nowrap; }
         .sm-ability-note { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-shadow: none; }
 
@@ -655,6 +655,77 @@
             font-size: 11px;
             color: var(--text-secondary);
             margin-top: 10px;
+        }
+
+        .stats-modal-body.expanded { max-width: 760px; }
+
+        .sm-expand-btn {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+            background: #2b2b31;
+            border: 1px solid #3a3a42;
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .sm-expand-btn:hover { background: #34343c; }
+
+        .sm-table-wrap {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid #2f2f36;
+        }
+
+        .sm-table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .sm-table th, .sm-table td {
+            padding: 9px 10px;
+            text-align: center;
+            border-bottom: 1px solid #2f2f36;
+        }
+
+        .sm-table th {
+            background: #26262c;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .sm-table td { background: #1f1f24; }
+        .sm-table tr:last-child td { border-bottom: none; }
+
+        .sm-table th:first-child, .sm-table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 1;
+        }
+
+        .sm-table td:first-child { background: #26262c; color: var(--accent-yellow); font-weight: 700; }
+        .sm-table td.dps { color: var(--accent-green); }
+        .sm-table td.none { color: #55555f; }
+
+        .sm-scroll-hint { display: none; }
+        @media (max-width: 600px) {
+            .sm-scroll-hint { display: block; font-size: 11px; color: var(--text-secondary); text-align: right; margin-bottom: 6px; }
+        }
+
+        .sm-table-note {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            text-align: center;
         }
 
         .stats-empty {
@@ -836,193 +907,175 @@
             { id: 20, name: "Noob", rarity: "Common", tier: "E", value: 1, demand: "1/10", stability: "Stable", img: "Noob.png" }
         ];
 
-        // 유닛별 레벨 스탯 (게임의 UnitLevel 모듈 값 그대로)
-        // Price: 1레벨 = 설치 비용, 2레벨부터 = 업그레이드 비용
+        // 유닛별 레벨 스탯 (기획 문서 기준)
+        // Price: 1레벨 = 설치 비용, 2레벨부터 = 그 레벨로 올리는 업그레이드 비용
+        // 특수 키: Slow(%), Splash, AOE(광역 각도), AOEDmg(광역딜), CloneCD/CloneTime(분신 소환 간격/유지 시간),
+        //          SummonHP(소환수 체력), Farmer/FarmerCD(돈/지급 간격), StunImmune(기절면역, 1 = 있음)
+        // special: "farm" = 공격 안 하고 돈 생산 (CoolTime = 돈 지급 간격), "build" = Damage가 짓는 벽의 체력
         // 새 유닛은 이름을 unitData의 name과 똑같이 맞춰서 추가
         const unitStats = {
             "Noob": {
-                type: "밸런스형",
                 levels: [
-                    { Damage: 5,  CoolTime: 1,    Range: 5,  ShotCoin: 0, Price: 100, Sell: 70 },
-                    { Damage: 10, CoolTime: 0.75, Range: 7,  ShotCoin: 0, Price: 80,  Sell: 150 },
-                    { Damage: 15, CoolTime: 0.5,  Range: 10, ShotCoin: 0, Price: 150, Sell: 250 }
+                    { Damage: 5, CoolTime: 1, Range: 5, ShotCoin: 0, Price: 100, Sell: 70 },
+                    { Damage: 10, CoolTime: 0.75, Range: 7, ShotCoin: 0, Price: 100, Sell: 150 },
+                    { Damage: 15, CoolTime: 0.5, Range: 10, ShotCoin: 0, Price: 150, Sell: 250 }
                 ]
             },
             "Soldier Noob": {
-                type: "밸런스형",
                 levels: [
-                    { Damage: 10, CoolTime: 1,   Range: 15, ShotCoin: 0, Price: 150, Sell: 100 },
+                    { Damage: 10, CoolTime: 1, Range: 15, ShotCoin: 0, Price: 150, Sell: 100 },
                     { Damage: 20, CoolTime: 0.6, Range: 20, ShotCoin: 0, Price: 200, Sell: 200 },
                     { Damage: 25, CoolTime: 0.4, Range: 20, ShotCoin: 0, Price: 300, Sell: 400 }
                 ]
             },
             "Zombie Noob": {
-                type: "속사형",
                 levels: [
-                    { Damage: 15, CoolTime: 1,   Range: 10, ShotCoin: 0, Price: 200, Sell: 150 },
+                    { Damage: 15, CoolTime: 1, Range: 10, ShotCoin: 0, Price: 200, Sell: 150 },
                     { Damage: 20, CoolTime: 0.5, Range: 15, ShotCoin: 0, Price: 150, Sell: 200 },
                     { Damage: 30, CoolTime: 0.5, Range: 20, ShotCoin: 0, Price: 250, Sell: 450 }
                 ]
             },
             "Boxer Noob": {
-                type: "속사형",
                 levels: [
-                    { Damage: 20, CoolTime: 1,   Range: 15, ShotCoin: 0, Price: 250, Sell: 200 },
+                    { Damage: 20, CoolTime: 1, Range: 15, ShotCoin: 0, Price: 250, Sell: 200 },
                     { Damage: 25, CoolTime: 0.8, Range: 20, ShotCoin: 0, Price: 250, Sell: 400 },
                     { Damage: 35, CoolTime: 0.6, Range: 25, ShotCoin: 0, Price: 400, Sell: 750 },
                     { Damage: 40, CoolTime: 0.4, Range: 30, ShotCoin: 0, Price: 550, Sell: 1200 }
                 ]
             },
-            "SledgeHammer Noob": {
-                type: "중장타형",
-                levels: [
-                    { Damage: 20, CoolTime: 1.5, Range: 10, ShotCoin: 0, Price: 400, Sell: 224 },
-                    { Damage: 25, CoolTime: 1,   Range: 15, ShotCoin: 0, Price: 300, Sell: 399 },
-                    { Damage: 30, CoolTime: 1,   Range: 20, ShotCoin: 0, Price: 500, Sell: 714,  Splash: 5 },
-                    { Damage: 50, CoolTime: 0.8, Range: 25, ShotCoin: 0, Price: 700, Sell: 1239, Splash: 7 }
-                ]
-            },
             "Spear Noob": {
-                type: "저격형",
                 levels: [
-                    { Damage: 30, CoolTime: 1,   Range: 15, ShotCoin: 0, Price: 300, Sell: 250 },
+                    { Damage: 30, CoolTime: 1, Range: 15, ShotCoin: 0, Price: 300, Sell: 250 },
                     { Damage: 40, CoolTime: 0.8, Range: 25, ShotCoin: 0, Price: 300, Sell: 450 },
                     { Damage: 45, CoolTime: 0.6, Range: 30, ShotCoin: 0, Price: 450, Sell: 850 }
                 ]
             },
-            "Knight Noob": {
-                type: "중장타형",
+            "SledgeHammer Noob": {
                 levels: [
-                    { Damage: 35, CoolTime: 1,   Range: 20, ShotCoin: 0, Price: 450,  Sell: 300 },
-                    { Damage: 60, CoolTime: 0.6, Range: 25, ShotCoin: 0, Price: 600,  Sell: 800,  Splash: 5 },
-                    { Damage: 85, CoolTime: 0.5, Range: 30, ShotCoin: 0, Price: 1200, Sell: 2000, Splash: 5 }
+                    { Damage: 20, CoolTime: 1.5, Range: 10, ShotCoin: 0, Price: 400, Sell: 300 },
+                    { Damage: 25, CoolTime: 1, Range: 15, ShotCoin: 0, Price: 300, Sell: 550 },
+                    { Damage: 30, CoolTime: 1, Range: 20, ShotCoin: 0, Price: 500, Sell: 1000, Splash: 5 },
+                    { Damage: 50, CoolTime: 0.8, Range: 25, ShotCoin: 0, Price: 700, Sell: 1650, Splash: 7 }
                 ]
             },
             "Medic Noob": {
-                type: "밸런스형",
-                special: "farm",   // 공격 대신 돈 생산 (Farmer_money)
+                special: "farm",
                 levels: [
-                    { Damage: 0, CoolTime: 0, Range: 0, ShotCoin: 0, Price: 200, Sell: 150,  Farmer: 50 },
-                    { Damage: 0, CoolTime: 0, Range: 0, ShotCoin: 0, Price: 200, Sell: 300,  Farmer: 100 },
-                    { Damage: 0, CoolTime: 0, Range: 0, ShotCoin: 0, Price: 450, Sell: 700,  Farmer: 250 },
+                    { Damage: 0, CoolTime: 0, Range: 0, ShotCoin: 0, Price: 200, Sell: 150, Farmer: 50 },
+                    { Damage: 0, CoolTime: 0, Range: 0, ShotCoin: 0, Price: 200, Sell: 300, Farmer: 100 },
+                    { Damage: 0, CoolTime: 0, Range: 0, ShotCoin: 0, Price: 450, Sell: 700, Farmer: 250 },
                     { Damage: 0, CoolTime: 0, Range: 0, ShotCoin: 0, Price: 600, Sell: 1200, Farmer: 300 }
                 ]
             },
-            "Ninja Noob": {
-                type: "속사형",
+            "Shielder Noob": {
                 levels: [
-                    { Damage: 45, CoolTime: 1,    Range: 15, ShotCoin: 0, Price: 500,  Sell: 350 },
-                    { Damage: 65, CoolTime: 0.8,  Range: 15, ShotCoin: 0, Price: 450,  Sell: 750 },
-                    { Damage: 75, CoolTime: 0.6,  Range: 20, ShotCoin: 0, Price: 800,  Sell: 1500 },
-                    { Damage: 90, CoolTime: 0.35, Range: 25, ShotCoin: 0, Price: 1100, Sell: 2500 }
+                    { Damage: 30, CoolTime: 1, Range: 10, ShotCoin: 0, Price: 400, Sell: 300, StunImmune: 1 },
+                    { Damage: 50, CoolTime: 0.9, Range: 20, ShotCoin: 0, Price: 350, Sell: 650, StunImmune: 1 },
+                    { Damage: 60, CoolTime: 0.75, Range: 25, ShotCoin: 0, Price: 600, Sell: 1100, StunImmune: 1 },
+                    { Damage: 75, CoolTime: 0.6, Range: 30, ShotCoin: 0, Price: 800, Sell: 1950, StunImmune: 1 }
                 ]
             },
-            "Shielder Noob": {
-                type: "중장타형",
+            "Ninja Noob": {
                 levels: [
-                    { Damage: 30, CoolTime: 1,    Range: 10, ShotCoin: 0, Price: 400, Sell: 300 },
-                    { Damage: 50, CoolTime: 0.85, Range: 20, ShotCoin: 0, Price: 350, Sell: 650 },
-                    { Damage: 60, CoolTime: 0.75, Range: 25, ShotCoin: 0, Price: 600, Sell: 1100 },
-                    { Damage: 75, CoolTime: 0.6,  Range: 30, ShotCoin: 0, Price: 800, Sell: 1950 }
+                    { Damage: 45, CoolTime: 1, Range: 15, ShotCoin: 0, Price: 500, Sell: 350 },
+                    { Damage: 65, CoolTime: 0.8, Range: 15, ShotCoin: 0, Price: 450, Sell: 750 },
+                    { Damage: 75, CoolTime: 0.6, Range: 20, ShotCoin: 0, Price: 800, Sell: 1500 },
+                    { Damage: 90, CoolTime: 0.4, Range: 25, ShotCoin: 0, Price: 1100, Sell: 2500 }
+                ]
+            },
+            "Knight Noob": {
+                levels: [
+                    { Damage: 35, CoolTime: 1, Range: 20, ShotCoin: 0, Price: 450, Sell: 300 },
+                    { Damage: 60, CoolTime: 0.6, Range: 25, ShotCoin: 0, Price: 600, Sell: 800, Splash: 5 },
+                    { Damage: 85, CoolTime: 0.5, Range: 30, ShotCoin: 0, Price: 1200, Sell: 2000, Splash: 5 }
                 ]
             },
             "Barbarian Noob": {
-                type: "중장타형",
                 levels: [
-                    { Damage: 90,  CoolTime: 1,   Range: 10, ShotCoin: 0, Price: 600,  Sell: 500 },
-                    { Damage: 100, CoolTime: 0.9, Range: 15, ShotCoin: 0, Price: 700,  Sell: 1100 },
-                    { Damage: 120, CoolTime: 0.6, Range: 30, ShotCoin: 0, Price: 1200, Sell: 2200, AOE: 40 },
-                    { Damage: 135, CoolTime: 0.4, Range: 35, ShotCoin: 0, Price: 2000, Sell: 4000, AOE: 75 }
+                    { Damage: 90, CoolTime: 1, Range: 10, ShotCoin: 0, Price: 600, Sell: 500 },
+                    { Damage: 100, CoolTime: 0.9, Range: 15, ShotCoin: 0, Price: 700, Sell: 1100 },
+                    { Damage: 120, CoolTime: 0.6, Range: 30, ShotCoin: 0, Price: 1200, Sell: 2200, AOE: 40, AOEDmg: 50 },
+                    { Damage: 135, CoolTime: 0.4, Range: 35, ShotCoin: 0, Price: 2000, Sell: 4000, AOE: 75, AOEDmg: 100 }
                 ]
             },
             "Builder Noob": {
-                type: "밸런스형",
-                special: "build",  // Damage = 짓는 구조물의 체력
+                special: "build",
                 levels: [
-                    { Damage: 500,  CoolTime: 25, Range: 12, ShotCoin: 0, Price: 600,  Sell: 525 },
-                    { Damage: 1000, CoolTime: 20, Range: 13, ShotCoin: 0, Price: 700,  Sell: 945 },
-                    { Damage: 1500, CoolTime: 20, Range: 14, ShotCoin: 0, Price: 1200, Sell: 1645 },
-                    { Damage: 3000, CoolTime: 15, Range: 16, ShotCoin: 0, Price: 1500, Sell: 2765 }
-                ]
-            },
-            "Gunner Noob": {
-                type: "속사형",
-                levels: [
-                    { Damage: 120, CoolTime: 1,    Range: 25, ShotCoin: 0, Price: 800,  Sell: 650 },
-                    { Damage: 150, CoolTime: 0.6,  Range: 30, ShotCoin: 0, Price: 650,  Sell: 1200 },
-                    { Damage: 180, CoolTime: 0.45, Range: 35, ShotCoin: 0, Price: 1000, Sell: 2200 },
-                    { Damage: 200, CoolTime: 0.3,  Range: 40, ShotCoin: 0, Price: 1750, Sell: 4000 }
+                    { Damage: 500, CoolTime: 25, Range: 12, ShotCoin: 0, Price: 600, Sell: 500 },
+                    { Damage: 1000, CoolTime: 20, Range: 13, ShotCoin: 0, Price: 700, Sell: 1100 },
+                    { Damage: 1500, CoolTime: 20, Range: 14, ShotCoin: 0, Price: 1200, Sell: 2200 },
+                    { Damage: 3000, CoolTime: 15, Range: 16, ShotCoin: 0, Price: 1500, Sell: 3800 }
                 ]
             },
             "Nature Noob": {
-                type: "밸런스형",
                 levels: [
-                    { Damage: 100, CoolTime: 1,    Range: 15, ShotCoin: 0, Price: 750,  Sell: 600,  Slow: 15 },
-                    { Damage: 150, CoolTime: 0.8,  Range: 25, ShotCoin: 0, Price: 800,  Sell: 1300, Slow: 20 },
-                    { Damage: 175, CoolTime: 0.65, Range: 35, ShotCoin: 0, Price: 1500, Sell: 2800, Slow: 25, Splash: 7 },
-                    { Damage: 180, CoolTime: 0.5,  Range: 40, ShotCoin: 0, Price: 2000, Sell: 4800, Slow: 30, Splash: 9 }
+                    { Damage: 100, CoolTime: 1, Range: 15, ShotCoin: 0, Price: 750, Sell: 600, Slow: 10 },
+                    { Damage: 150, CoolTime: 0.8, Range: 25, ShotCoin: 0, Price: 800, Sell: 1300, Slow: 15 },
+                    { Damage: 175, CoolTime: 0.65, Range: 35, ShotCoin: 0, Price: 1500, Sell: 2800, Slow: 20, Splash: 7 },
+                    { Damage: 180, CoolTime: 0.5, Range: 40, ShotCoin: 0, Price: 2000, Sell: 4800, Slow: 25, Splash: 9 }
                 ]
             },
-            "Hologram Noob": {
-                type: "저격형",
+            "Gunner Noob": {
                 levels: [
-                    { Damage: 150, CoolTime: 1,   Range: 10, ShotCoin: 0, Price: 1500, Sell: 1200, Clone: 1 },
-                    { Damage: 250, CoolTime: 0.8, Range: 20, ShotCoin: 0, Price: 1200, Sell: 2350, Clone: 1 },
-                    { Damage: 350, CoolTime: 0.6, Range: 25, ShotCoin: 0, Price: 2500, Sell: 4500, Clone: 1 },
-                    { Damage: 500, CoolTime: 0.5, Range: 30, ShotCoin: 0, Price: 4500, Sell: 9250, Clone: 1 }
-                ]
-            },
-            "King Noob": {
-                type: "밸런스형",
-                special: "farm",   // CoolTime마다 Farmer_money 지급 + 소환 (SummonHP = 소환수 체력)
-                levels: [
-                    { Damage: 0, CoolTime: 30, Range: 0, ShotCoin: 0, Price: 1000, Sell: 800,   Farmer: 100, SummonHP: 1000 },
-                    { Damage: 0, CoolTime: 25, Range: 0, ShotCoin: 0, Price: 2000, Sell: 2500,  Farmer: 200, SummonHP: 2000 },
-                    { Damage: 0, CoolTime: 20, Range: 0, ShotCoin: 0, Price: 3000, Sell: 5350,  Farmer: 400, SummonHP: 4000 },
-                    { Damage: 0, CoolTime: 15, Range: 0, ShotCoin: 0, Price: 6000, Sell: 10500, Farmer: 500, SummonHP: 5000 }
-                ]
-            },
-            "Laser Noob": {
-                type: "저격형",
-                levels: [
-                    { Damage: 100, CoolTime: 1,   Range: 25, ShotCoin: 0, Price: 1000, Sell: 800 },
-                    { Damage: 120, CoolTime: 0.7, Range: 30, ShotCoin: 0, Price: 1250, Sell: 2000 },
-                    { Damage: 140, CoolTime: 0.5, Range: 35, ShotCoin: 0, Price: 2000, Sell: 4000,  Slow: 25 },
-                    { Damage: 145, CoolTime: 0.3, Range: 40, ShotCoin: 0, Price: 4000, Sell: 7800,  Slow: 35 },
-                    { Damage: 175, CoolTime: 0.2, Range: 45, ShotCoin: 0, Price: 6500, Sell: 14000, Slow: 40 }
+                    { Damage: 120, CoolTime: 1, Range: 25, ShotCoin: 0, Price: 800, Sell: 650 },
+                    { Damage: 150, CoolTime: 0.6, Range: 30, ShotCoin: 0, Price: 650, Sell: 1200 },
+                    { Damage: 180, CoolTime: 0.45, Range: 35, ShotCoin: 0, Price: 1000, Sell: 2200 },
+                    { Damage: 200, CoolTime: 0.3, Range: 40, ShotCoin: 0, Price: 1750, Sell: 4000 }
                 ]
             },
             "Magical Noob": {
-                type: "저격형",
                 levels: [
-                    { Damage: 100, CoolTime: 1,    Range: 10, ShotCoin: 0, Price: 1500, Sell: 1200 },
-                    { Damage: 150, CoolTime: 0.9,  Range: 10, ShotCoin: 0, Price: 1500, Sell: 2500 },
-                    { Damage: 200, CoolTime: 0.75, Range: 15, ShotCoin: 0, Price: 2000, Sell: 4500,  AOE: 45 },
-                    { Damage: 225, CoolTime: 0.5,  Range: 20, ShotCoin: 0, Price: 2500, Sell: 7000,  AOE: 60 },
-                    { Damage: 250, CoolTime: 0.3,  Range: 25, ShotCoin: 0, Price: 3500, Sell: 9500,  AOE: 90 },
-                    { Damage: 350, CoolTime: 0.2,  Range: 30, ShotCoin: 0, Price: 4000, Sell: 13000, AOE: 120 }
+                    { Damage: 100, CoolTime: 1, Range: 10, ShotCoin: 0, Price: 1500, Sell: 1200 },
+                    { Damage: 150, CoolTime: 0.9, Range: 10, ShotCoin: 0, Price: 1500, Sell: 2500 },
+                    { Damage: 200, CoolTime: 0.75, Range: 15, ShotCoin: 0, Price: 2000, Sell: 4500, AOE: 45 },
+                    { Damage: 225, CoolTime: 0.5, Range: 20, ShotCoin: 0, Price: 2500, Sell: 7000, AOE: 60 },
+                    { Damage: 250, CoolTime: 0.3, Range: 25, ShotCoin: 0, Price: 3500, Sell: 9500, AOE: 90 },
+                    { Damage: 350, CoolTime: 0.2, Range: 30, ShotCoin: 0, Price: 4000, Sell: 13000, AOE: 120 }
+                ]
+            },
+            "Laser Noob": {
+                levels: [
+                    { Damage: 100, CoolTime: 1, Range: 25, ShotCoin: 0, Price: 1000, Sell: 800 },
+                    { Damage: 120, CoolTime: 0.7, Range: 30, ShotCoin: 0, Price: 1250, Sell: 2000 },
+                    { Damage: 140, CoolTime: 0.5, Range: 35, ShotCoin: 0, Price: 2000, Sell: 4000, Slow: 25 },
+                    { Damage: 145, CoolTime: 0.3, Range: 40, ShotCoin: 0, Price: 4000, Sell: 7800, Slow: 35 },
+                    { Damage: 175, CoolTime: 0.2, Range: 45, ShotCoin: 0, Price: 6500, Sell: 14000, Slow: 40 }
+                ]
+            },
+            "Hologram Noob": {
+                levels: [
+                    { Damage: 150, CoolTime: 1, Range: 10, ShotCoin: 0, Price: 1500, Sell: 1200 },
+                    { Damage: 250, CoolTime: 0.8, Range: 20, ShotCoin: 0, Price: 1200, Sell: 2350 },
+                    { Damage: 350, CoolTime: 0.6, Range: 25, ShotCoin: 0, Price: 2500, Sell: 4500, CloneCD: 15, CloneTime: 10 },
+                    { Damage: 500, CoolTime: 0.5, Range: 30, ShotCoin: 0, Price: 4500, Sell: 9250, CloneCD: 15, CloneTime: 10 }
+                ]
+            },
+            "King Noob": {
+                special: "farm",
+                levels: [
+                    { Damage: 0, CoolTime: 30, Range: 0, ShotCoin: 0, Price: 1000, Sell: 800, Farmer: 100, SummonHP: 1000 },
+                    { Damage: 0, CoolTime: 25, Range: 0, ShotCoin: 0, Price: 2000, Sell: 2500, Farmer: 200, SummonHP: 2000 },
+                    { Damage: 0, CoolTime: 20, Range: 0, ShotCoin: 0, Price: 3000, Sell: 5350, Farmer: 400, SummonHP: 4000 },
+                    { Damage: 0, CoolTime: 15, Range: 0, ShotCoin: 0, Price: 6000, Sell: 10500, Farmer: 500, SummonHP: 5000 }
                 ]
             },
             "Fairy Noob": {
-                type: "저격형",
-                // 공격 + Lv4부터 FarmerCD(Farmer_Cooldown)초마다 Farmer(Farmer_money) 지급
                 levels: [
-                    { Damage: 30,  CoolTime: 1,   Range: 10, ShotCoin: 0, Price: 800,  Sell: 550 },
-                    { Damage: 60,  CoolTime: 0.9, Range: 15, ShotCoin: 0, Price: 800,  Sell: 1300 },
-                    { Damage: 90,  CoolTime: 0.8, Range: 20, ShotCoin: 0, Price: 1500, Sell: 2250 },
-                    { Damage: 100, CoolTime: 0.6, Range: 25, ShotCoin: 0, Price: 2000, Sell: 5000,  Farmer: 50,  FarmerCD: 40 },
-                    { Damage: 130, CoolTime: 0.5, Range: 30, ShotCoin: 0, Price: 3000, Sell: 7000,  Farmer: 100, FarmerCD: 35 },
-                    { Damage: 150, CoolTime: 0.3, Range: 35, ShotCoin: 0, Price: 4000, Sell: 10000, Farmer: 150, FarmerCD: 30 }
+                    { Damage: 30, CoolTime: 1, Range: 10, ShotCoin: 0, Price: 800, Sell: 550 },
+                    { Damage: 60, CoolTime: 0.9, Range: 15, ShotCoin: 0, Price: 800, Sell: 1300 },
+                    { Damage: 90, CoolTime: 0.8, Range: 20, ShotCoin: 0, Price: 1500, Sell: 2550, AOE: 20 },
+                    { Damage: 100, CoolTime: 0.6, Range: 25, ShotCoin: 0, Price: 2000, Sell: 5000, AOE: 35, Farmer: 50, FarmerCD: 40 },
+                    { Damage: 130, CoolTime: 0.5, Range: 30, ShotCoin: 0, Price: 3000, Sell: 7000, AOE: 45, Farmer: 100, FarmerCD: 35 },
+                    { Damage: 150, CoolTime: 0.3, Range: 35, ShotCoin: 0, Price: 4000, Sell: 10000, AOE: 90, Farmer: 150, FarmerCD: 30 }
                 ]
             },
             "Mafia Noob": {
-                type: "속사형",
                 levels: [
-                    { Damage: 100, CoolTime: 1,    Range: 15, ShotCoin: 0, Price: 1000, Sell: 750 },
-                    { Damage: 150, CoolTime: 0.9,  Range: 20, ShotCoin: 0, Price: 1000, Sell: 1500 },
-                    { Damage: 175, CoolTime: 0.85, Range: 25, ShotCoin: 0, Price: 2000, Sell: 3350 },
-                    { Damage: 250, CoolTime: 0.6,  Range: 30, ShotCoin: 0, Price: 3000, Sell: 5500 },
-                    { Damage: 450, CoolTime: 0.5,  Range: 35, ShotCoin: 0, Price: 4000, Sell: 9500 }
+                    { Damage: 100, CoolTime: 1, Range: 15, ShotCoin: 0, Price: 1000, Sell: 750 },
+                    { Damage: 150, CoolTime: 0.9, Range: 20, ShotCoin: 0, Price: 1000, Sell: 1500 },
+                    { Damage: 175, CoolTime: 0.8, Range: 25, ShotCoin: 0, Price: 2000, Sell: 3350 },
+                    { Damage: 250, CoolTime: 0.6, Range: 30, ShotCoin: 0, Price: 3000, Sell: 5500 },
+                    { Damage: 450, CoolTime: 0.5, Range: 35, ShotCoin: 0, Price: 4000, Sell: 9500 }
                 ]
             }
         };
@@ -1243,54 +1296,133 @@
         }
 
         // 특수 능력 표시 설정 (levels에 이 키가 있으면 오른쪽 위에 표시)
-        //  flag: 값 없이 이름만 표시 / label: 값 앞 글자 / extra: 같이 보여줄 쿨타임 키
+        //  name: 표시 이름 / label: 값 앞 글자 / suffix: 단위 / flag: 값 없이 이름만 / extras: 같이 보여줄 값
         const abilityInfo = [
-            { key: 'Slow',     icon: '🐌', suffix: '%' },
-            { key: 'Splash',   icon: '💥' },
-            { key: 'AOE',      icon: '🌀' },
-            { key: 'Clone',    icon: '👥', flag: true },
-            { key: 'SummonHP', icon: '👑', name: 'Summoner', label: 'HP' },
-            { key: 'Farmer',   icon: '💰', extra: 'FarmerCD' }
+            { key: 'Slow',       icon: '🐌', suffix: '%' },
+            { key: 'Splash',     icon: '💥' },
+            { key: 'AOE',        icon: '🌀', suffix: '°', extras: [{ key: 'AOEDmg', pre: 'Dmg: ' }] },
+            { key: 'CloneCD',    icon: '👥', name: 'Clone', label: 'Every', suffix: 's', extras: [{ key: 'CloneTime', pre: 'Lasts: ', suf: 's' }] },
+            { key: 'SummonHP',   icon: '👑', name: 'Summoner', label: 'HP' },
+            { key: 'Farmer',     icon: '💰', extras: [{ key: 'FarmerCD', pre: '⏱️ ', suf: 's' }] },
+            { key: 'StunImmune', icon: '🛡️', name: 'Stun Immune', flag: true }
         ];
 
+        // 확장 표에 쓰는 열 이름/단위
+        const extraCols = [
+            { key: 'Slow',       th: '🐌 Slow',       suf: '%' },
+            { key: 'Splash',     th: '💥 Splash' },
+            { key: 'AOE',        th: '🌀 AOE',        suf: '°' },
+            { key: 'AOEDmg',     th: '🌀 AOE Dmg' },
+            { key: 'CloneCD',    th: '👥 Clone Every', suf: 's' },
+            { key: 'CloneTime',  th: '👥 Clone Lasts', suf: 's' },
+            { key: 'SummonHP',   th: '👑 Summon HP' },
+            { key: 'Farmer',     th: '💰 Farmer' },
+            { key: 'FarmerCD',   th: '💰 Every',      suf: 's' },
+            { key: 'StunImmune', th: '🛡️ Stun Immune', flag: true }
+        ];
+
+        let statsExpanded = false;
+        let currentStatsUnit = null;
+
+        function toggleStatsExpand() {
+            statsExpanded = !statsExpanded;
+            openStats(currentStatsUnit);
+        }
+
+        function buildAbilityHtml(stats) {
+            let html = '';
+            const lv = stats.levels;
+            const last = lv[lv.length - 1];
+
+            if (stats.special === 'build') {
+                html += `<div class="sm-ability-block"><div class="sm-ability">🔨 Build</div></div>`;
+            } else if (stats.special === 'farm') {
+                html += `<div class="sm-ability-block"><div class="sm-ability">💰 Farmer</div></div>`;
+            }
+
+            abilityInfo.forEach(a => {
+                if (a.key === 'Farmer' && stats.special === 'farm') return; // 아래 줄에 이미 표시됨
+                const firstIdx = lv.findIndex(l => l[a.key] > 0);
+                if (firstIdx === -1) return;
+                const rng = (k, pre = '', suf = '') => {
+                    const x = lv[firstIdx][k], y = last[k];
+                    return x === y ? `${pre}${fmt(x)}${suf}` : `${pre}${fmt(x)}${suf} → ${fmt(y)}${suf}`;
+                };
+                let vals = '';
+                if (!a.flag) vals += `<div class="sm-ability-val">${rng(a.key, (a.label || a.key) + ': ', a.suffix || '')}</div>`;
+                (a.extras || []).forEach(e => {
+                    if (lv[firstIdx][e.key] > 0) vals += `<div class="sm-ability-val">${rng(e.key, e.pre || '', e.suf || '')}</div>`;
+                });
+                html += `
+                    <div class="sm-ability-block">
+                        <div class="sm-ability">${a.icon} ${a.name || a.key}</div>
+                        ${vals}
+                        ${firstIdx > 0 ? `<div class="sm-ability-note">Lv${firstIdx + 1}부터</div>` : ''}
+                    </div>
+                `;
+            });
+            return html;
+        }
+
+        // 기본 보기: 1렙 → 만렙
+        function buildCompactRows(stats) {
+            const lv = stats.levels;
+            const f = lv[0], l = lv[lv.length - 1];
+            const row = (icon, a, b) => `<div class="sm-row"><div class="sm-icon">${icon}</div><div class="sm-val">${statRange(a, b)}</div></div>`;
+            const allZero = key => lv.every(x => !x[key]);
+
+            let rows = '';
+            if (stats.special === 'farm') rows += row('💰', f.Farmer, l.Farmer);
+            else rows += row(stats.special === 'build' ? '❤️' : '🗡️', f.Damage, l.Damage);
+            if (!allZero('Range')) rows += row('🎯', f.Range, l.Range);
+            if (!allZero('CoolTime')) rows += row('⏱️', f.CoolTime, l.CoolTime);
+            if (!stats.special && f.CoolTime > 0 && l.CoolTime > 0) {
+                rows += `<div class="sm-dps">DPS ${statRange(f.Damage / f.CoolTime, l.Damage / l.CoolTime)}</div>`;
+            }
+            return `<div class="sm-rows">${rows}</div><div class="sm-caption">Lv 1 → Lv ${lv.length} (Max)</div>`;
+        }
+
+        // 확장 보기: 모든 레벨 표
+        function buildLevelTable(stats) {
+            const lv = stats.levels;
+            const allZero = key => lv.every(x => !x[key]);
+            const cols = [];
+
+            if (stats.special === 'farm') cols.push({ th: '💰 Farmer', v: l => fmt(l.Farmer) });
+            else cols.push({ th: stats.special === 'build' ? '❤️ Wall HP' : '🗡️ Damage', v: l => fmt(l.Damage) });
+            if (!allZero('Range')) cols.push({ th: '🎯 Range', v: l => fmt(l.Range) });
+            if (!allZero('CoolTime')) cols.push({ th: '⏱️ Cooldown', v: l => fmt(l.CoolTime) + 's' });
+            if (!stats.special && lv.every(l => l.CoolTime > 0)) cols.push({ th: 'DPS', cls: 'dps', v: l => fmt(l.Damage / l.CoolTime) });
+
+            extraCols.forEach(c => {
+                if (c.key === 'Farmer' && stats.special === 'farm') return;
+                if (allZero(c.key)) return;
+                cols.push({ th: c.th, v: l => l[c.key] > 0 ? (c.flag ? '✓' : fmt(l[c.key]) + (c.suf || '')) : null });
+            });
+
+            cols.push({ th: '🪙 Cost', v: l => fmt(l.Price) });
+            cols.push({ th: '💸 Sell', v: l => fmt(l.Sell) });
+
+            const head = `<tr><th>Lv</th>${cols.map(c => `<th>${c.th}</th>`).join('')}</tr>`;
+            const body = lv.map((l, i) => `<tr><td>${i + 1}</td>${cols.map(c => {
+                const val = c.v(l);
+                return val === null ? '<td class="none">-</td>' : `<td class="${c.cls || ''}">${val}</td>`;
+            }).join('')}</tr>`).join('');
+
+            return `
+                <div class="sm-scroll-hint">표를 옆으로 밀면 더 볼 수 있어요 →</div>
+                <div class="sm-table-wrap"><table class="sm-table"><thead>${head}</thead><tbody>${body}</tbody></table></div>
+                <div class="sm-table-note">Cost: Lv1 = 설치 비용, Lv2부터 = 그 레벨로 올리는 업그레이드 비용</div>
+            `;
+        }
+
         function openStats(unit) {
+            currentStatsUnit = unit;
             const content = document.getElementById('statsContent');
+            const body = document.querySelector('.stats-modal-body');
             const stats = unitStats[unit.name];
             const imgSrc = encodeURI(`./${unit.img}`);
             const color = rarityColor[unit.rarity] || '#94a3b8';
-
-            // 오른쪽 위 능력 목록
-            let abilityHtml = '';
-            if (stats) {
-                const lv = stats.levels;
-                const last = lv[lv.length - 1];
-
-                if (stats.special === 'build') {
-                    abilityHtml += `<div class="sm-ability-block"><div class="sm-ability">🔨 Build</div></div>`;
-                } else if (stats.special === 'farm') {
-                    abilityHtml += `<div class="sm-ability-block"><div class="sm-ability">💰 Farmer</div></div>`;
-                }
-
-                abilityInfo.forEach(a => {
-                    if (a.key === 'Farmer' && stats.special === 'farm') return; // 이미 아래 줄에 표시됨
-                    const firstIdx = lv.findIndex(l => l[a.key] > 0);
-                    if (firstIdx === -1) return;
-                    const rng = (k, suf = '') => {
-                        const x = lv[firstIdx][k], y = last[k];
-                        return x === y ? `${fmt(x)}${suf}` : `${fmt(x)}${suf} → ${fmt(y)}${suf}`;
-                    };
-                    let vals = '';
-                    if (!a.flag) vals += `<div class="sm-ability-val">${a.label || a.key}: ${rng(a.key, a.suffix || '')}</div>`;
-                    if (a.extra && lv[firstIdx][a.extra] > 0) vals += `<div class="sm-ability-val">⏱️ ${rng(a.extra, 's')}</div>`;
-                    abilityHtml += `
-                        <div class="sm-ability-block">
-                            <div class="sm-ability">${a.icon} ${a.name || a.key}</div>
-                            ${vals}
-                            ${firstIdx > 0 ? `<div class="sm-ability-note">Lv${firstIdx + 1}부터</div>` : ''}
-                        </div>
-                    `;
-                });
-            }
 
             let html = `
                 <div class="sm-name">${unit.name}</div>
@@ -1301,34 +1433,17 @@
                     <div class="sm-img">
                         <img src="${imgSrc}" alt="${unit.name}" onerror="this.onerror=null; this.src='https://via.placeholder.com/100'">
                     </div>
-                    <div class="sm-right">${abilityHtml}</div>
+                    <div class="sm-right">${stats ? buildAbilityHtml(stats) : ''}</div>
                 </div>
             `;
 
             if (!stats) {
                 html += `<div class="stats-empty">📊 이 유닛의 스탯은 곧 추가됩니다.</div>`;
+                body.classList.remove('expanded');
             } else {
-                const lv = stats.levels;
-                const f = lv[0], l = lv[lv.length - 1];
-                const row = (icon, a, b) => `<div class="sm-row"><div class="sm-icon">${icon}</div><div class="sm-val">${statRange(a, b)}</div></div>`;
-                const allZero = key => lv.every(x => !x[key]);
-
-                let rows = '';
-                if (stats.special === 'farm') {
-                    rows += row('💰', f.Farmer, l.Farmer);
-                } else {
-                    rows += row(stats.special === 'build' ? '❤️' : '🗡️', f.Damage, l.Damage);
-                }
-                if (!allZero('Range')) rows += row('🎯', f.Range, l.Range);
-                if (!allZero('CoolTime')) rows += row('⏱️', f.CoolTime, l.CoolTime);
-                if (!stats.special && f.CoolTime > 0 && l.CoolTime > 0) {
-                    rows += `<div class="sm-dps">DPS ${statRange(f.Damage / f.CoolTime, l.Damage / l.CoolTime)}</div>`;
-                }
-
-                html += `
-                    <div class="sm-rows">${rows}</div>
-                    <div class="sm-caption">Lv 1 → Lv ${lv.length} (Max)</div>
-                `;
+                html += statsExpanded ? buildLevelTable(stats) : buildCompactRows(stats);
+                html += `<button class="sm-expand-btn" onclick="toggleStatsExpand()">${statsExpanded ? '▲ 접기' : '▼ 확장 (모든 레벨 보기)'}</button>`;
+                body.classList.toggle('expanded', statsExpanded);
             }
 
             content.innerHTML = html;
