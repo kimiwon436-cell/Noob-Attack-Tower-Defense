@@ -1520,11 +1520,20 @@
 
         // ================= 가치 계산 =================
         // 가치 = 티어 기본값 × 등급 배율 × 스탯 배율  (숫자만 바꾸면 전체 가치가 다시 계산돼요)
-        const VALUE_TIER_BASE = { S: 2000, A: 1000, B: 400, C: 150, D: 50, E: 5 };
-        const VALUE_RARITY_MULT = {
-            Common: 1, Uncommon: 1.1, Rare: 1.25, Epic: 1.5,
-            Legendary: 1.8, Exclusive: 2.0, Mythical: 2.5
-        };
+        const VALUE_TIER_BASE = { S: 500, A: 250, B: 100, C: 40, D: 12, E: 2 };
+
+        // 등급 배율은 뽑기 확률로 계산: (커먼 확률 ÷ 그 등급 확률) ^ VALUE_RARITY_POWER
+        //  POWER 1 = 확률 그대로 (신화가 커먼의 450배), 0.5 = 제곱근 (신화가 커먼의 약 21배)
+        const VALUE_DROP_RATE = { Common: 45, Uncommon: 36, Rare: 15, Epic: 5, Legendary: 0.9, Mythical: 0.1 };
+        const VALUE_RARITY_POWER = 0.5;
+        const VALUE_EXCLUSIVE_AS = 'Legendary'; // 익스클루시브(현질)는 뽑기가 아니라서 이 등급과 같은 배율로 계산
+
+        const VALUE_RARITY_MULT = {};
+        Object.keys(VALUE_DROP_RATE).forEach(r => {
+            VALUE_RARITY_MULT[r] = Math.pow(VALUE_DROP_RATE.Common / VALUE_DROP_RATE[r], VALUE_RARITY_POWER);
+        });
+        VALUE_RARITY_MULT.Exclusive = VALUE_RARITY_MULT[VALUE_EXCLUSIVE_AS];
+
         const VALUE_STAT_MIN = 0.8;       // 공격 유닛 중 만렙 DPS가 가장 낮은 유닛
         const VALUE_STAT_MAX = 1.2;       // 공격 유닛 중 만렙 DPS가 가장 높은 유닛
         const VALUE_STAT_SPECIAL = 1.0;   // 공격 안 하는 유닛 (Medic, King, Builder)
