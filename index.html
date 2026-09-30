@@ -878,33 +878,34 @@
     </div>
 
     <script>
+        // value(가치)는 아래 "가치 계산" 부분에서 티어·등급·스탯으로 자동 계산돼요
         const unitData = [
             // S티어
-            { id: 3, name: "Magical Noob", rarity: "Mythical", tier: "S", value: 6000, demand: "8/10", stability: "Stable", img: "Magical_Noob.png" },
-            { id: 5, name: "Laser Noob", rarity: "Mythical", tier: "S", value: 5000, demand: "7.5/10", stability: "Slowly Rising", img: "Laser_Noob.png" },
+            { id: 3, name: "Magical Noob", rarity: "Mythical", tier: "S", demand: "8/10", stability: "Stable", img: "Magical_Noob.png" },
+            { id: 5, name: "Laser Noob", rarity: "Mythical", tier: "S", demand: "7.5/10", stability: "Slowly Rising", img: "Laser_Noob.png" },
             // A티어
-            { id: 2, name: "King Noob", rarity: "Mythical", tier: "A", value: 3500, demand: "8.5/10", stability: "Stable", img: "King_Noob.png" },
-            { id: 7, name: "Nature Noob", rarity: "Legendary", tier: "A", value: 2500, demand: "7.5/10", stability: "Rising", img: "Nature_Noob.png" },
-            { id: 10, name: "Gunner Noob", rarity: "Legendary", tier: "A", value: 2000, demand: "6/10", stability: "Stable", img: "Gunner_Noob.png" },
+            { id: 2, name: "King Noob", rarity: "Mythical", tier: "A", demand: "8.5/10", stability: "Stable", img: "King_Noob.png" },
+            { id: 7, name: "Nature Noob", rarity: "Legendary", tier: "A", demand: "7.5/10", stability: "Rising", img: "Nature_Noob.png" },
+            { id: 10, name: "Gunner Noob", rarity: "Legendary", tier: "A", demand: "6/10", stability: "Stable", img: "Gunner_Noob.png" },
             // B티어
-            { id: 1, name: "Hologram Noob", rarity: "Mythical", tier: "B", value: 1500, demand: "9/10", stability: "Rising", img: "Hologram_Noob.png" },
-            { id: 9, name: "Barbarian Noob", rarity: "Legendary", tier: "B", value: 800, demand: "6.5/10", stability: "Stable", img: "Barbarian_Noob.png" },
-            { id: 4, name: "Mafia Noob", rarity: "Exclusive", tier: "B", value: 400, demand: "8.5/10", stability: "Stable", img: "Mafia_Noob.png" },
-            { id: 8, name: "Fairy Noob", rarity: "Exclusive", tier: "B", value: 300, demand: "7/10", stability: "Stable", img: "Fairy_Noob.png" },
+            { id: 1, name: "Hologram Noob", rarity: "Mythical", tier: "B", demand: "9/10", stability: "Rising", img: "Hologram_Noob.png" },
+            { id: 9, name: "Barbarian Noob", rarity: "Legendary", tier: "B", demand: "6.5/10", stability: "Stable", img: "Barbarian_Noob.png" },
+            { id: 4, name: "Mafia Noob", rarity: "Exclusive", tier: "B", demand: "8.5/10", stability: "Stable", img: "Mafia_Noob.png" },
+            { id: 8, name: "Fairy Noob", rarity: "Exclusive", tier: "B", demand: "7/10", stability: "Stable", img: "Fairy_Noob.png" },
             // C티어
-            { id: 6, name: "Builder Noob", rarity: "Legendary", tier: "C", value: 200, demand: "8/10", stability: "Stable", img: "Builder_Noob.png" },
-            { id: 11, name: "Ninja Noob", rarity: "Epic", tier: "C", value: 150, demand: "6/10", stability: "Stable", img: "Ninja_Noob.png" },
-            { id: 14, name: "Medic Noob", rarity: "Epic", tier: "C", value: 120, demand: "4/10", stability: "Stable", img: "Medic_Noob.png" },
-            { id: 17, name: "Boxer Noob", rarity: "Rare", tier: "C", value: 100, demand: "3/10", stability: "Stable", img: "Boxer_Noob.png" },
+            { id: 6, name: "Builder Noob", rarity: "Legendary", tier: "C", demand: "8/10", stability: "Stable", img: "Builder_Noob.png" },
+            { id: 11, name: "Ninja Noob", rarity: "Epic", tier: "C", demand: "6/10", stability: "Stable", img: "Ninja_Noob.png" },
+            { id: 14, name: "Medic Noob", rarity: "Epic", tier: "C", demand: "4/10", stability: "Stable", img: "Medic_Noob.png" },
+            { id: 17, name: "Boxer Noob", rarity: "Rare", tier: "C", demand: "3/10", stability: "Stable", img: "Boxer_Noob.png" },
             // D티어
-            { id: 12, name: "Shielder Noob", rarity: "Epic", tier: "D", value: 70, demand: "6/10", stability: "Stable", img: "Shielder_Noob.png" },
-            { id: 13, name: "Knight Noob", rarity: "Epic", tier: "D", value: 50, demand: "5/10", stability: "Stable", img: "Knight_Noob.png" },
-            { id: 15, name: "Spear Noob", rarity: "Rare", tier: "D", value: 30, demand: "4/10", stability: "Stable", img: "Spear_Noob.png" },
-            { id: 18, name: "Soldier Noob", rarity: "Uncommon", tier: "D", value: 20, demand: "2/10", stability: "Stable", img: "Soldier_Noob.png" },
+            { id: 12, name: "Shielder Noob", rarity: "Epic", tier: "D", demand: "6/10", stability: "Stable", img: "Shielder_Noob.png" },
+            { id: 13, name: "Knight Noob", rarity: "Epic", tier: "D", demand: "5/10", stability: "Stable", img: "Knight_Noob.png" },
+            { id: 15, name: "Spear Noob", rarity: "Rare", tier: "D", demand: "4/10", stability: "Stable", img: "Spear_Noob.png" },
+            { id: 18, name: "Soldier Noob", rarity: "Uncommon", tier: "D", demand: "2/10", stability: "Stable", img: "Soldier_Noob.png" },
             // E티어
-            { id: 16, name: "SledgeHammer Noob", rarity: "Rare", tier: "E", value: 10, demand: "3/10", stability: "Stable", img: "SledgeHammer_Noob.png" },
-            { id: 19, name: "Zombie Noob", rarity: "Uncommon", tier: "E", value: 5, demand: "2/10", stability: "Stable", img: "Zombie_Noob.png" },
-            { id: 20, name: "Noob", rarity: "Common", tier: "E", value: 1, demand: "1/10", stability: "Stable", img: "Noob.png" }
+            { id: 16, name: "SledgeHammer Noob", rarity: "Rare", tier: "E", demand: "3/10", stability: "Stable", img: "SledgeHammer_Noob.png" },
+            { id: 19, name: "Zombie Noob", rarity: "Uncommon", tier: "E", demand: "2/10", stability: "Stable", img: "Zombie_Noob.png" },
+            { id: 20, name: "Noob", rarity: "Common", tier: "E", demand: "1/10", stability: "Stable", img: "Noob.png" }
         ];
 
         // 유닛별 레벨 스탯 (기획 문서 기준)
@@ -1516,6 +1517,58 @@
                 fallback();
             }
         }
+
+        // ================= 가치 계산 =================
+        // 가치 = 티어 기본값 × 등급 배율 × 스탯 배율  (숫자만 바꾸면 전체 가치가 다시 계산돼요)
+        const VALUE_TIER_BASE = { S: 2000, A: 1000, B: 400, C: 150, D: 50, E: 5 };
+        const VALUE_RARITY_MULT = {
+            Common: 1, Uncommon: 1.1, Rare: 1.25, Epic: 1.5,
+            Legendary: 1.8, Exclusive: 2.0, Mythical: 2.5
+        };
+        const VALUE_STAT_MIN = 0.8;       // 공격 유닛 중 만렙 DPS가 가장 낮은 유닛
+        const VALUE_STAT_MAX = 1.2;       // 공격 유닛 중 만렙 DPS가 가장 높은 유닛
+        const VALUE_STAT_SPECIAL = 1.0;   // 공격 안 하는 유닛 (Medic, King, Builder)
+        const VALUE_ABILITY_BONUS = 0.05; // 특수 능력 하나당 +5% (Slow, Splash, AOE, 분신, 소환, 돈, 기절면역)
+        const VALUE_ABILITY_KEYS = ['Slow', 'Splash', 'AOE', 'CloneCD', 'SummonHP', 'Farmer', 'StunImmune'];
+
+        function maxDps(stats) {
+            const l = stats.levels[stats.levels.length - 1];
+            return l.CoolTime > 0 ? l.Damage / l.CoolTime : 0;
+        }
+
+        // 공격 유닛 DPS 범위 (로그 스케일로 비교 → 한 유닛이 너무 튀지 않게)
+        const dpsList = Object.values(unitStats).filter(st => !st.special).map(maxDps).filter(d => d > 0);
+        const DPS_LOG_MIN = Math.log(Math.min(...dpsList));
+        const DPS_LOG_MAX = Math.log(Math.max(...dpsList));
+
+        function statMultiplier(stats) {
+            if (!stats) return 1;
+            let mult;
+            if (stats.special) {
+                mult = VALUE_STAT_SPECIAL;
+            } else {
+                const t = (Math.log(maxDps(stats)) - DPS_LOG_MIN) / (DPS_LOG_MAX - DPS_LOG_MIN);
+                mult = VALUE_STAT_MIN + (VALUE_STAT_MAX - VALUE_STAT_MIN) * t;
+            }
+            const abilities = VALUE_ABILITY_KEYS.filter(k =>
+                !(k === 'Farmer' && stats.special === 'farm') && stats.levels.some(l => l[k] > 0)
+            ).length;
+            return mult + abilities * VALUE_ABILITY_BONUS;
+        }
+
+        function roundValue(v) {
+            if (v < 100) return Math.max(1, Math.round(v));
+            if (v < 1000) return Math.round(v / 5) * 5;
+            return Math.round(v / 50) * 50;
+        }
+
+        function computeUnitValue(unit) {
+            const base = VALUE_TIER_BASE[unit.tier] || 0;
+            const rarity = VALUE_RARITY_MULT[unit.rarity] || 1;
+            return roundValue(base * rarity * statMultiplier(unitStats[unit.name]));
+        }
+
+        unitData.forEach(u => { u.value = computeUnitValue(u); });
 
         // 초기화 실행
         renderValueList();
